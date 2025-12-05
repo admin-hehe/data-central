@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Data Viewer — Pagination Model Baru</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* minor styling for table header sticky on small screens */
+    thead th { position: sticky; top: 0; background: white; z-index: 5; }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-indigo-50 to-white min-h-screen p-6">
+
+  <div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- SEARCH SECTION -->
+    <div class="bg-indigo-100 border border-indigo-200 shadow-sm rounded-xl p-6">
+      <h2 class="text-xl font-semibold text-indigo-800 mb-3">🔎 Pencarian</h2>
+      <p class="text-sm text-indigo-700 mb-4">Cari data secara cepat — ketik untuk memfilter semua kolom.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input id="searchInput" type="text"
+               placeholder="Ketik kata kunci... (contoh: nama, kode, kota)"
+               class="col-span-1 md:col-span-3 p-3 border border-indigo-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        />
+      </div>
+    </div>
+
+    <!-- TABLE SECTION -->
+    <div class="bg-white border border-gray-200 shadow-md rounded-xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-800">📋 Data</h3>
+        <div class="text-sm text-gray-600" id="rowsSummary">Memuat data...</div>
+      </div>
+
+      <div class="overflow-x-auto rounded-lg border border-gray-100">
+        <table class="w-full table-auto divide-y" id="dataTable">
+          <thead id="tableHead" class="bg-gray-50"></thead>
+          <tbody id="tableBody" class="bg-white"></tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION (model: info + Prev / current/total / Next) -->
+      <div id="pagination" class="mt-4"></div>
+    </div>
+
+  </div>
+
+<script>
+/* ===========================
+   CONFIG: ganti API_URL di sini
+   =========================== */
+const API_URL = "https://script.google.com/macros/s/AKfycbzOzFLjBQYuVsvFYKh8Z5Gzt0P-kuWTjfrRiIbSVvPMg8DAxfSghfVBRbjice0_2OksDA/exec"; // <-- ganti dengan URL web app Apps Script Anda
+
+/* State */
+let originalData = [];       // array of objects from API
+let currentPage = 1;
+let rowsPerPage = 10;        // ubah kalau mau default lain
+
+/* Elems */
+const searchInput = document.getElementById('searchInput');
+const tableHead = document.getElementById('tableHead');
+const tableBody = document.getElementById('tableBody');
+const paginationEl = document.getElementById('pagination');
+const rowsSummary = document.getElementById('rowsSummary');
+
+/* Fetch data from API */
+async function fetchData() {
+  rowsSummary.textContent = "Memuat data...";
+  try {
+    const res = await fetch(API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const json = await res.json();
+
+    if (json && json.error) {
+      rowsSummary.textContent = "API Error: " + json.error;
+      originalData = [];
+      renderTable();
+      return;
+    }
+
+    if (!Array.isArray(json)) {
+      rowsSummary.textContent = "Response API bukan array JSON.";
+      originalData = [];
+      renderTable();
+      return;
+    }
+
+    originalData = json;
+    currentPage = 1;
+    renderTable();
+  } catch (err) {
+    console.error(err);
+    rowsSummary.textContent = "Gagal memuat data: " + err.message;
+    originalData = [];
+    renderTable();
+  }
+}
+
+/* Utility: escape HTML for safety */
+function esc(s) {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/* Get filtered data according to search input */
+function getFilteredData() {
+  const q = (searchInput.value || "").trim().toLowerCase();
+  if (!q) return originalData.slice(); // return copy
+
+  return originalData.filter(row => {
+    // check any cell contains q
+    for (const key in row) {
+      const v = row[key];
+      if (v !== null && v !== undefined) {
+        if (String(v).toLowerCase().includes(q)) return true;
+      }
+    }
+    return false;
+  });
+}
+
+/* Render table and pagination */
+function renderTable() {
+  const filtered = getFilteredData();
+  const totalItems = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / rowsPerPage));
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  // Table header
+  tableHead.innerHTML = "";
+  if (totalItems === 0) {
+    tableHead.innerHTML = "";
+    tableBody.innerHTML = `<tr><td class="p-6 text-center text-gray-500" colspan="1">Tidak ada data.</td></tr>`;
+    rowsSummary.textContent = "Menampilkan 0 - 0 dari 0 baris.";
+    paginationEl.innerHTML = "";
+    return;
+  }
+
+  const columns = Object.keys(filtered[0]);
+  const th = document.createElement('tr');
+  columns.forEach(col => {
+    const thCell = document.createElement('th');
+    thCell.className = "px-4 py-3 text-left text-sm font-medium text-gray-700 border-b";
+    thCell.innerHTML = esc(col);
+    th.appendChild(thCell);
+  });
+  tableHead.appendChild(th);
+
+  // Table body (paginated)
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
+  const pageSlice = filtered.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = "";
+  pageSlice.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.className = "even:bg-gray-50";
+    columns.forEach(col => {
+      const td = document.createElement('td');
+      td.className = "px-4 py-3 text-sm text-gray-800 border-b align-top";
+      td.innerHTML = esc(row[col]);
+      tr.appendChild(td);
+    });
+    tableBody.appendChild(tr);
+  });
+
+  // Rows summary text (like gambar)
+  rowsSummary.textContent = `Menampilkan ${startIndex + 1} - ${endIndex} dari ${totalItems} baris.`;
+
+  // Render pagination controls (Prev, current/total, Next)
+  renderPaginationControls(totalItems, totalPages);
+}
+
+/* Pagination controls rendering */
+function renderPaginationControls(totalItems, totalPages) {
+  const start = (currentPage - 1) * rowsPerPage + 1;
+  const end = Math.min(currentPage * rowsPerPage, totalItems);
+
+  paginationEl.innerHTML = `
+    <div class="flex items-center justify-between bg-white p-3 border-t">
+      <div class="text-sm text-gray-600">
+        Menampilkan ${start} - ${end} dari ${totalItems} baris.
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="prevBtn" class="px-4 py-2 rounded bg-gray-100 border hover:bg-gray-200 disabled:opacity-50">Prev</button>
+        <div class="text-sm font-medium text-gray-800">${currentPage} / ${totalPages}</div>
+        <button id="nextBtn" class="px-4 py-2 rounded bg-gray-100 border hover:bg-gray-200 disabled:opacity-50">Next</button>
+      </div>
+    </div>
+  `;
+
+  // enable/disable
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  prevBtn.disabled = (currentPage <= 1);
+  nextBtn.disabled = (currentPage >= totalPages);
+
+  prevBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+      // scroll to table top (optional, small smooth)
+      window.scrollTo({ top: document.getElementById('dataTable').offsetTop - 80, behavior: 'smooth' });
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTable();
+      window.scrollTo({ top: document.getElementById('dataTable').offsetTop - 80, behavior: 'smooth' });
+    }
+  });
+}
+
+/* Reset page on new search (debounced) */
+let debounceTimer = null;
+searchInput.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    currentPage = 1;
+    renderTable();
+  }, 250);
+});
+
+/* Initial load */
+fetchData();
+</script>
+</body>
+</html>
+
