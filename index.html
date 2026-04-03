@@ -121,12 +121,16 @@ async function fetchData() {
   rowsSummary.textContent = "Syncing...";
   try {
     const res = await fetch(API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Network response was not ok");
     const json = await res.json();
-    originalData = Array.isArray(json) ? json : [];
+    originalData = Array.isArray(json) ? json : (json.data || []);
+    originalData.reverse(); 
+    
     renderTable();
   } catch (err) {
-    rowsSummary.textContent = "Error";
-    renderTable();
+    console.error("Fetch error:", err);
+    rowsSummary.textContent = "Error Connection";
+    tableBody.innerHTML = `<tr><td colspan="100%" class="p-10 text-center text-red-400">Gagal mengambil data</td></tr>`;
   }
 }
 
