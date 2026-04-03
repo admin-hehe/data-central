@@ -1,13 +1,16 @@
 export async function onRequest(context) {
-  // Ambil URL GAS dari environment variable yang nanti kita set di dashboard
-  const gasUrl = context.env.GAS_URL;
-
-  // Forward request ke Google Apps Script
-  const response = await fetch(gasUrl, {
-    method: context.request.method,
-    headers: context.request.headers,
-    body: context.request.body
+  const { request, env } = context;
+    const gasUrl = new URL(env.GAS_URL);
+    const requestUrl = new URL(request.url);
+  
+  const searchParams = requestUrl.searchParams;
+  searchParams.forEach((value, key) => {
+    gasUrl.searchParams.set(key, value);
   });
 
-  return response;
+  return fetch(gasUrl.toString(), {
+    method: request.method,
+    headers: request.headers,
+    body: request.body
+  });
 }
