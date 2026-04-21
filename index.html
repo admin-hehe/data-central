@@ -3,104 +3,132 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Data Central</title>
+  <title>DATA CENTRAL</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    body { 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      background-color: #f8fafc;
-      color: #1e293b;
-    }
-    
-    /* Dark Mode Styling */
-    @media (prefers-color-scheme: dark) {
-      body { background-color: #0f172a; color: #f1f5f9; }
-      .main-card { background: #1e293b !important; border-color: #334155 !important; }
-      .input-field { background: #0f172a !important; border-color: #334155 !important; color: white !important; }
-      .table-header { background: #111827 !important; color: #94a3b8 !important; }
-      .row-data { border-color: #334155 !important; }
-      .text-dim { color: #94a3b8 !important; }
+    :root {
+      --bg: #fdfdfd;
+      --main: #a3e635; /* Lime Neon */
+      --secondary: #8b5cf6; /* Violet */
+      --black: #000000;
     }
 
-    /* Fix Responsive Table vs Card */
+    body { 
+      font-family: 'Space Grotesk', sans-serif; 
+      background-color: #f0f0f0;
+      color: var(--black);
+    }
+
+    h1, .neo-title { font-family: 'Public Sans', sans-serif; font-weight: 900; }
+
+    /* Neo-Brutalism Utility Classes */
+    .neo-brutal-box {
+      background: white;
+      border: 3px solid var(--black);
+      box-shadow: 6px 6px 0px 0px var(--black);
+      transition: all 0.2s ease;
+    }
+
+    .neo-brutal-box:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 8px 8px 0px 0px var(--black);
+    }
+
+    .neo-brutal-btn {
+      border: 3px solid var(--black);
+      box-shadow: 4px 4px 0px 0px var(--black);
+      font-weight: 700;
+      transition: all 0.1s ease;
+    }
+
+    .neo-brutal-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px 0px var(--black);
+    }
+
+    .neo-input {
+      border: 3px solid var(--black);
+      box-shadow: 4px 4px 0px 0px var(--black);
+      outline: none;
+    }
+
+    .neo-input:focus {
+      background-color: #fef9c3; /* Soft yellow alert */
+    }
+
     @media (max-width: 768px) {
       .desktop-table { display: none; }
       .mobile-card-container { display: block; }
-      .card-item {
-        background: white;
-        border-radius: 16px;
-        padding: 16px;
-        margin-bottom: 16px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-      }
-      @media (prefers-color-scheme: dark) {
-        .card-item { background: #1e293b; border: 1px solid #334155; }
-      }
     }
     @media (min-width: 769px) {
       .mobile-card-container { display: none; }
       .desktop-table { display: table; }
     }
 
-    .custom-gradient {
-      background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+    /* Table specifics */
+    th {
+      border-bottom: 3px solid var(--black) !important;
+      background: var(--main) !important;
+    }
+    td {
+      border-bottom: 2px solid var(--black) !important;
     }
   </style>
 </head>
-<body class="min-h-screen pb-10">
+<body class="p-4 md:p-8">
 
-  <div class="h-2 w-full custom-gradient"></div>
-
-  <div class="max-w-6xl mx-auto px-4 mt-8">
-    
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+  <div class="max-w-6xl mx-auto">
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Data Central<span class="text-indigo-500">.</span></h1>
-        <p class="text-sm text-gray-500 text-dim">Hello World!</p>
+        <h1 class="text-5xl md:text-7xl uppercase tracking-tighter leading-none mb-2">
+          DATA <span class="bg-lime-400 px-2 border-4 border-black">CENTRAL</span>
+        </h1>
+        <p class="text-xl font-bold uppercase italic text-gray-700 italic">PROMOTION TOOLS_</p>
       </div>
-      <div id="rowsSummary" class="px-4 py-2 bg-indigo-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-indigo-500/20 uppercase tracking-wider">
-        Memuat...
+      <div id="rowsSummary" class="neo-brutal-box bg-violet-400 px-6 py-3 text-lg font-black uppercase">
+        Loading...
       </div>
-    </div>
+    </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
-      <div class="md:col-span-9 relative">
-        <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <input id="searchInput" type="text" placeholder="Cari data..." 
-               class="input-field w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm shadow-gray-100" />
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+      <div class="md:col-span-8">
+        <label class="block text-xs font-black uppercase mb-1">Cari Data Disini:</label>
+        <div class="relative">
+          <input id="searchInput" type="text" placeholder="KETIK SESUATU..." 
+                 class="neo-input w-full p-4 text-lg font-bold placeholder-gray-400" autocomplete="off"/>
+        </div>
       </div>
-      <div class="md:col-span-3">
+      <div class="md:col-span-4">
+        <label class="block text-xs font-black uppercase mb-1">Limit Baris:</label>
         <select id="rowsPerPageSelect" 
-                class="input-field w-full px-4 py-3.5 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-semibold text-sm appearance-none cursor-pointer shadow-sm shadow-gray-100">
-          <option value="10">10 Baris</option>
-          <option value="25">25 Baris</option>
-          <option value="50">50 Baris</option>
+                class="neo-input w-full p-4 text-lg font-bold appearance-none cursor-pointer bg-white">
+          <option value="10">10 BARIS</option>
+          <option value="25">25 BARIS</option>
+          <option value="50">50 BARIS</option>
         </select>
       </div>
     </div>
 
-    <div class="main-card bg-white border border-gray-100 rounded-[24px] overflow-hidden shadow-xl shadow-gray-200/50">
-      
-      <table class="desktop-table w-full text-left border-collapse" id="dataTable">
-        <thead id="tableHead" class="table-header bg-gray-50 text-[11px] font-bold uppercase tracking-widest text-gray-500 border-b border-gray-100">
+    <div class="neo-brutal-box overflow-hidden mb-10">
+      <table class="desktop-table w-full text-left" id="dataTable">
+        <thead id="tableHead" class="text-sm font-black uppercase tracking-tighter italic">
         </thead>
-        <tbody id="tableBody" class="divide-y divide-gray-50">
+        <tbody id="tableBody" class="bg-white">
         </tbody>
       </table>
 
-      <div id="mobileContainer" class="mobile-card-container p-4 bg-gray-50 dark:bg-slate-900/50">
+      <div id="mobileContainer" class="mobile-card-container p-4 space-y-4 bg-gray-200">
       </div>
 
-      <div id="pagination" class="p-6 border-t border-gray-100">
+      <div id="pagination" class="p-6 bg-white border-t-4 border-black">
       </div>
     </div>
   </div>
 
-<script src="script.js" defer></script>
-  
+  <script src="script.js" defer></script>
 </body>
 </html>
