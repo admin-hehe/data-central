@@ -49,55 +49,52 @@ function renderTable() {
   const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
   const pageSlice = filtered.slice(startIndex, endIndex);
 
-  // Clear
   tableHead.innerHTML = "";
   tableBody.innerHTML = "";
   mobileContainer.innerHTML = "";
 
   if (totalItems === 0) {
-    const emptyMsg = `<div class="p-10 text-center text-gray-400">Data tidak ditemukan</div>`;
+    const emptyMsg = `<div class="p-10 text-center font-black uppercase text-2xl italic">KOSONG, BRO!</div>`;
     tableBody.innerHTML = `<tr><td colspan="100%">${emptyMsg}</td></tr>`;
     mobileContainer.innerHTML = emptyMsg;
-    rowsSummary.textContent = "0 Baris";
+    rowsSummary.textContent = "0 ROWS";
     return;
   }
 
   const columns = Object.keys(filtered[0]);
 
-  // Render Desktop Header
+  // Header Desktop
   const thRow = document.createElement('tr');
   columns.forEach(col => {
     const th = document.createElement('th');
-    th.className = "px-6 py-4";
+    th.className = "px-6 py-4 border-r-2 border-black last:border-r-0";
     th.innerHTML = esc(col);
     thRow.appendChild(th);
   });
   tableHead.appendChild(thRow);
 
-  // Render Rows (Desktop & Mobile)
+  // Body
   pageSlice.forEach(row => {
-    // Desktop Row
     const tr = document.createElement('tr');
-    tr.className = "hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-colors";
+    tr.className = "hover:bg-yellow-100 transition-colors";
     
-    // Mobile Card
     const card = document.createElement('div');
-    card.className = "card-item";
+    card.className = "neo-brutal-box p-4 bg-white";
 
     columns.forEach(col => {
       const val = esc(row[col]);
       
-      // Fill Desktop
+      // Desktop
       const td = document.createElement('td');
-      td.className = "px-6 py-4 text-sm font-medium row-data";
+      td.className = "px-6 py-4 text-base font-bold border-r-2 border-black last:border-r-0";
       td.innerHTML = val;
       tr.appendChild(td);
 
-      // Fill Mobile
+      // Mobile
       card.innerHTML += `
-        <div class="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
-          <span class="text-[10px] uppercase font-bold text-indigo-500">${esc(col)}</span>
-          <span class="text-sm font-semibold ml-5">${val}</span>
+        <div class="flex flex-col mb-3 last:mb-0">
+          <span class="text-[10px] uppercase font-black bg-black text-white self-start px-1 mb-1">${esc(col)}</span>
+          <span class="text-lg font-bold">${val}</span>
         </div>
       `;
     });
@@ -105,16 +102,16 @@ function renderTable() {
     mobileContainer.appendChild(card);
   });
 
-  rowsSummary.textContent = `${totalItems} Total Baris`;
+  rowsSummary.textContent = `${totalItems} DATA_TOTAL`;
   renderPaginationControls(totalItems, totalPages);
 }
 
 function renderPaginationControls(totalItems, totalPages) {
   paginationEl.innerHTML = `
-    <div class="flex items-center justify-between">
-      <button id="prevBtn" class="px-6 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-700 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Prev</button>
-      <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Hal ${currentPage} / ${totalPages}</span>
-      <button id="nextBtn" class="px-6 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-700 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Next</button>
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+      <button id="prevBtn" class="neo-brutal-btn w-full md:w-auto px-8 py-3 bg-white hover:bg-lime-400 disabled:opacity-30 uppercase">← PREV</button>
+      <span class="text-xl font-black italic">PAGE ${currentPage} / ${totalPages}</span>
+      <button id="nextBtn" class="neo-brutal-btn w-full md:w-auto px-8 py-3 bg-white hover:bg-lime-400 disabled:opacity-30 uppercase">NEXT →</button>
     </div>
   `;
 
